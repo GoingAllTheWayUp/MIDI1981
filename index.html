@@ -1,0 +1,125 @@
+<html>
+<head>
+
+    
+
+
+
+    <link rel="stylesheet" href="http://www.adammdunn.com/1981/default.css" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <input id="term" type="text"/> <input name="Search" id="searchButton" type="button" value="Search"/>
+    <div id="result"></div>
+ 
+    <style>
+        #books {
+            width:390px;
+            text-align:center;
+            border:solid 1px #000;
+            overflow:hidden;
+        }
+        #books div {
+            width:180px;
+            text-align:left;
+            border:solid 1px #000;
+            margin:1px;
+            padding:2px 5px;
+        }
+        .col1 {
+            float:left;
+            clear:both;
+        }
+        .col2 {
+            float:right;
+        }
+    </style>
+</head>
+<body>
+    <p>Data extracted from an <b>XML</b> file</p>
+    <div id="books"></div>
+</body>
+
+<script>
+
+
+    $("#searchButton").click(function () {
+    keyword = $("input#term").val();
+ 
+    //Reset any message
+    var errMsg = '';
+    pub = '';
+
+	//Check if a keyword exists
+    if (keyword == '') {
+      errMsg += 'Please enter a search keyword';
+    } else {
+
+       var oXHR = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+
+function reportStatus() {
+    if (oXHR.readyState == 4)               // REQUEST COMPLETED.
+        showTheList(this.responseXML);      // ALL SET. NOW SHOW XML DATA.
+}
+
+oXHR.onreadystatechange = reportStatus;
+oXHR.open("GET", "MIDI1981.xml", true);      // true = ASYNCHRONOUS REQUEST (DESIRABLE), false = SYNCHRONOUS REQUEST.
+oXHR.send();
+    }
+ 
+    if (errMsg != '') {
+      pub += '<div class="error">';
+      pub += errMsg;
+      pub += '</div>';
+    }
+ 
+    //Show error
+    $('#result').html(pub);
+ 
+
+
+	//Use enter key to trigger the search query  
+	$("input#term").keypress(function (e) {
+	var key = e.which;
+	if (key == 13){
+     $("#searchButton").click();
+     return false;
+	}
+  });
+
+  function showTheList(xml) {
+        var divBooks = document.getElementById('books');      // THE PARENT DIV.
+        var MIDILIST = xml.getElementsByTagName('row');       // THE XML TAG NAME.
+
+        for (var i = 0; i < MIDILIST.length; i++) {
+
+
+            //Search path for Keyword
+            var pathway0 = "" + MIDILIST[i].getElementsByTagName("Path").InnerXml;
+            //var pathway1 = pathway0.toString();
+
+            if (pathway0.indexOf(keyword) == -1){ 
+                errMsg += 'Nothing found';
+
+            } else {
+
+            // CREATE CHILD DIVS INSIDE THE PARENT DIV.
+            var divLeft = document.createElement('div');
+            divLeft.className = 'col1';
+            divLeft.innerHTML = MIDILIST[i].getElementsByTagName("FileName")[0].childNodes[0].nodeValue;
+            
+            var divRight = document.createElement('div');
+            divRight.className = 'col2';
+            divRight.innerHTML = MIDILIST[i].getElementsByTagName("Size")[0].childNodes[0].nodeValue;
+
+            // ADD THE CHILD TO THE PARENT DIV.
+            divBooks.appendChild(divLeft);
+            divBooks.appendChild(divRight);
+            
+        }
+            }
+    };
+}
+    
+    )
+
+</script>
+</html>
